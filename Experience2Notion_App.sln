@@ -5,6 +5,8 @@ VisualStudioVersion = 17.12.35527.113 d17.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Experience2Notion_App", "Experience2Notion_App\Experience2Notion_App.csproj", "{5AE26004-A8D8-45A3-B1D4-FE5BBE073FBE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Experience2Notion", "..\Experience2Notion\Experience2Notion\Experience2Notion.csproj", "{5716F0F5-5967-4267-B65C-B9426AE08E74}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{5AE26004-A8D8-45A3-B1D4-FE5BBE073FBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5AE26004-A8D8-45A3-B1D4-FE5BBE073FBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5AE26004-A8D8-45A3-B1D4-FE5BBE073FBE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5716F0F5-5967-4267-B65C-B9426AE08E74}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5716F0F5-5967-4267-B65C-B9426AE08E74}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5716F0F5-5967-4267-B65C-B9426AE08E74}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5716F0F5-5967-4267-B65C-B9426AE08E74}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
