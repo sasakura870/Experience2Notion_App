@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "Experience2Notion_App": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7266",
+      "launchBrowser": false
+    }
+  }
+}
