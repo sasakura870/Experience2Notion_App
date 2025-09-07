@@ -15,7 +15,7 @@ public class CreateBookPageFunction(ILogger<CreateBookPageFunction> logger)
     [Function("CreateBookPage")]
     public async Task< IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req)
     {
-        var requestBody = new StreamReader(req.Body).ReadToEnd();
+        var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
         _logger.LogInformation(requestBody);
         var data = JsonSerializer.Deserialize<CreateBookRequest>(requestBody);
         if (data is null || string.IsNullOrWhiteSpace(data.Isbn))
