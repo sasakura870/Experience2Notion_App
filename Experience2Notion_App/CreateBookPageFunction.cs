@@ -35,7 +35,7 @@ public class CreateBookPageFunction(ILogger<CreateBookPageFunction> logger)
 
         var notionClient = new NotionClient();
         var imageId = await notionClient.UploadImageAsync($"{book.Title}.jpg", imageData, mime);
-        await notionClient.CreateBookPageAsync(book.Title, book.Authors, book.CanonicalVolumeLink, book.PublishedDate, imageId);
-        return new OkObjectResult("Welcome to Azure Functions!");
+        var result = await notionClient.CreateBookPageAsync(book.Title, book.Authors, book.CanonicalVolumeLink, book.PublishedDate, imageId);
+        return new OkObjectResult(result);
     }
 }
