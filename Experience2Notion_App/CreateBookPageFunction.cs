@@ -8,9 +8,12 @@ using System.Text.Json;
 
 namespace Experience2Notion_App;
 
-public class CreateBookPageFunction(ILogger<CreateBookPageFunction> logger)
+public class CreateBookPageFunction(ILogger<CreateBookPageFunction> logger, GoogleBookSeacher googleBookSeacher, GoogleImageSearcher googleImageSearcher, NotionClient notionClient)
 {
     private readonly ILogger<CreateBookPageFunction> _logger = logger;
+    private readonly GoogleBookSeacher _googleBookSeacher = googleBookSeacher;
+    private readonly GoogleImageSearcher _googleImageSearcher = googleImageSearcher;
+    private readonly NotionClient _notionClient = notionClient;
 
     [Function("CreateBookPage")]
     public async Task< IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req)
@@ -23,19 +26,10 @@ public class CreateBookPageFunction(ILogger<CreateBookPageFunction> logger)
             return new BadRequestObjectResult("ISBNが指定されていません。");
         }
 
-        var service = new GoogleBookSeacher();
-        var book = await service.SearchByIsbnAsync(data.Isbn);
-
-        Console.WriteLine($"タイトル: {book.Title}");
-        Console.WriteLine($"著者: {string.Join(", ", book.Authors)}");
-        Console.WriteLine($"出版日: {book.PublishedDate}");
-
-        var searcher = new GoogleImageSearcher();
-        var (imageData, mime) = await searcher.DownloadImageAsync($"{book.Title} {string.Join(' ', book.Authors)}");
-
-        var notionClient = new NotionClient();
-        var imageId = await notionClient.UploadImageAsync($"{book.Title}.jpg", imageData, mime);
-        var result = await notionClient.CreateBookPageAsync(book.Title, book.Authors, book.CanonicalVolumeLink, book.PublishedDate, imageId);
+        var book = await _googleBookSeacher.SearchByIsbnAsync(data.Isbn);
+        var (imageData, mime) = await _googleImageSearcher.DownloadImageAsync($"{book.Title} {string.Join(' ', book.Authors)}");
+        var imageId = await _notionClient.UploadImageAsync($"{book.Title}.jpg", imageData, mime);
+        var result = await _notionClient.CreateBookPageAsync(book.Title, book.Authors, book.CanonicalVolumeLink, book.PublishedDate, imageId);
         return new OkObjectResult(result);
     }
 }
