@@ -36,8 +36,8 @@ public class CreateMusicAlbumPageFunction(ILogger<CreateMusicAlbumPageFunction> 
             using var httpClient = new HttpClient();
             imageData = await httpClient.GetByteArrayAsync(spotifyAlbumData.Images[0].Url);
         }
-        var imageId = await _notionClient.UploadImageAsync($"{album.Title}.jpg", imageData, MediaTypeNames.Image.Jpeg);
-        var result = await _notionClient.CreateMusicAlbumPageAsync(album.Title, album.Artist, spotifyAlbumData.ExternalUrl, spotifyAlbumData.ReleaseDate, imageId);
+        var imageId = await _notionClient.UploadImageAsync($"{spotifyAlbumData.Name}.jpg", imageData, MediaTypeNames.Image.Jpeg);
+        var result = await _notionClient.CreateMusicAlbumPageAsync(spotifyAlbumData.Name, spotifyAlbumData.Artists.Select(artist => artist.Name), spotifyAlbumData.ExternalUrl, spotifyAlbumData.ReleaseDate, imageId);
         return new OkObjectResult(result);
     }
 }
