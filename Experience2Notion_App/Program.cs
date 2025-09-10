@@ -14,6 +14,7 @@ builder.Services
 
 builder.Services.AddSingleton<GoogleBookSeacher>();
 builder.Services.AddSingleton<GoogleImageSearcher>();
+builder.Services.AddSingleton<SpotifyClient>();
 builder.Services.AddSingleton<NotionClient>();
 
 builder.Build().Run();
