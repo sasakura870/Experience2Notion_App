@@ -25,14 +25,15 @@ public class CreateRestaurantPageFunction
             _logger.LogInformation(requestBody);
             var data = JsonSerializer.Deserialize<CreateRestaurantRequest>(requestBody);
 
+            foreach (var photo in data.Photos)
+            {
+                var photoData = Convert.FromBase64String(photo);
+                File.WriteAllBytes($"{Guid.NewGuid()}.jpg", photoData);
+            }
+
             if (data is null || string.IsNullOrWhiteSpace(data.Name) || string.IsNullOrWhiteSpace(data.Address))
             {
                 return new BadRequestObjectResult("Restaurant name and address are required.");
-            }
-
-            if (data.VisitDate == default(DateTime))
-            {
-                return new BadRequestObjectResult("Visit date is required.");
             }
 
             // Log the received data for verification
