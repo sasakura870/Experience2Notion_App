@@ -1,5 +1,5 @@
-using Experience2Notion.Exceptions;
-using Experience2Notion.Services;
+// using Experience2Notion.Exceptions;
+// using Experience2Notion.Services;
 using Experience2Notion_App.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -9,12 +9,13 @@ using System.Text.Json;
 
 namespace Experience2Notion_App;
 
-public class CreateBookPageFunction(ILogger<CreateBookPageFunction> logger, GoogleBookSeacher googleBookSeacher, GoogleImageSearcher googleImageSearcher, NotionClient notionClient)
+public class CreateBookPageFunction(ILogger<CreateBookPageFunction> logger/*, GoogleBookSeacher googleBookSeacher, GoogleImageSearcher googleImageSearcher, NotionClient notionClient*/)
 {
     private readonly ILogger<CreateBookPageFunction> _logger = logger;
-    private readonly GoogleBookSeacher _googleBookSeacher = googleBookSeacher;
-    private readonly GoogleImageSearcher _googleImageSearcher = googleImageSearcher;
-    private readonly NotionClient _notionClient = notionClient;
+    // Temporarily commented out until Experience2Notion library is available
+    // private readonly GoogleBookSeacher _googleBookSeacher = googleBookSeacher;
+    // private readonly GoogleImageSearcher _googleImageSearcher = googleImageSearcher;
+    // private readonly NotionClient _notionClient = notionClient;
 
     [Function("CreateBookPage")]
     public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req)
@@ -26,18 +27,22 @@ public class CreateBookPageFunction(ILogger<CreateBookPageFunction> logger, Goog
             var data = JsonSerializer.Deserialize<CreateBookRequest>(requestBody);
             if (data is null || string.IsNullOrWhiteSpace(data.Isbn))
             {
-                return new BadRequestObjectResult("ISBNÇ™éwíËÇ≥ÇÍÇƒÇ¢Ç‹ÇπÇÒÅB");
+                return new BadRequestObjectResult("ISBNÔøΩÔøΩÔøΩwÔøΩËÇ≥ÔøΩÔøΩƒÇÔøΩÔøΩ‹ÇÔøΩÔøΩÔøΩB");
             }
 
-            var book = await _googleBookSeacher.SearchByIsbnAsync(data.Isbn);
-            var (imageData, mime) = await _googleImageSearcher.DownloadImageAsync($"{book.Title} {string.Join(' ', book.Authors)}");
-            var imageId = await _notionClient.UploadImageAsync($"{book.Title}.jpg", imageData, mime);
-            var result = await _notionClient.CreateBookPageAsync(book.Title, book.Authors, book.CanonicalVolumeLink, book.PublishedDate, imageId);
+            // TODO: Implement when Experience2Notion library is available
+            // var book = await _googleBookSeacher.SearchByIsbnAsync(data.Isbn);
+            // var (imageData, mime) = await _googleImageSearcher.DownloadImageAsync($"{book.Title} {string.Join(' ', book.Authors)}");
+            // var imageId = await _notionClient.UploadImageAsync($"{book.Title}.jpg", imageData, mime);
+            // var result = await _notionClient.CreateBookPageAsync(book.Title, book.Authors, book.CanonicalVolumeLink, book.PublishedDate, imageId);
+            
+            var result = new { message = "Book data received successfully", isbn = data.Isbn };
             return new OkObjectResult(result);
         }
-        catch (Experience2NotionException ex)
+        catch (Exception ex)
         {
-            return new BadRequestObjectResult(ex.Message);
+            _logger.LogError(ex, "Error processing book page creation request");
+            return new BadRequestObjectResult("An error occurred while processing the request.");
         }
     }
 }

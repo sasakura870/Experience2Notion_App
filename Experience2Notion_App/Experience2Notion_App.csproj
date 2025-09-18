@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <AzureFunctionsVersion>v4</AzureFunctionsVersion>
     <OutputType>Exe</OutputType>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -17,8 +17,10 @@
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="2.0.5" />
   </ItemGroup>
 
+  <!-- Temporarily commenting out missing project reference
   <ItemGroup>
     <ProjectReference Include="..\..\Experience2Notion\Experience2Notion\Experience2Notion.csproj" />
   </ItemGroup>
+  -->
 
 </Project>
