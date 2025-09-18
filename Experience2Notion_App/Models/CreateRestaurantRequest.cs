@@ -10,7 +10,7 @@ public class CreateRestaurantRequest
     public string Address { get; set; } = string.Empty;
 
     [JsonPropertyName("visit_date")]
-    public DateTime VisitDate { get; set; }
+    public string VisitDate { get; set; } = string.Empty;
 
     [JsonPropertyName("photos")]
     public string[] Photos { get; set; } = [];
