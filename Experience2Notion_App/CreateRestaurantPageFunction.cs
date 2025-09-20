@@ -9,9 +9,10 @@ using System.Text.Json;
 
 namespace Experience2Notion_App;
 
-public class CreateRestaurantPageFunction(ILogger<CreateRestaurantPageFunction> logger, NotionClient notionClient)
+public class CreateRestaurantPageFunction(ILogger<CreateRestaurantPageFunction> logger, GoogleEngineSearcher googleEngineSearcher, NotionClient notionClient)
 {
     private readonly ILogger<CreateRestaurantPageFunction> _logger = logger;
+    private readonly GoogleEngineSearcher _googleEngineSearcher = googleEngineSearcher;
     private readonly NotionClient _notionClient = notionClient;
 
     [Function("CreateRestaurantPage")]
@@ -31,8 +32,8 @@ public class CreateRestaurantPageFunction(ILogger<CreateRestaurantPageFunction> 
             {
                 return new BadRequestObjectResult("住所が指定されていません。");
             }
+            var link = await _googleEngineSearcher.GetFirstLinkAsync($"{data.Name} {data.Address} 食べログ");
             var address = data.Address;
-            var link = "";
 
             var imageIdList = new List<string>();
             foreach (var photo in data.Photos)
