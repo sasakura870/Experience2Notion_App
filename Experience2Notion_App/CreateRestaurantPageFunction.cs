@@ -1,20 +1,18 @@
+using Experience2Notion.Services;
 using Experience2Notion_App.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
+using System.Net.Mime;
 using System.Text.Json;
 
 namespace Experience2Notion_App;
 
-public class CreateRestaurantPageFunction
+public class CreateRestaurantPageFunction(ILogger<CreateRestaurantPageFunction> logger, NotionClient notionClient)
 {
-    private readonly ILogger<CreateRestaurantPageFunction> _logger;
-
-    public CreateRestaurantPageFunction(ILogger<CreateRestaurantPageFunction> logger)
-    {
-        _logger = logger;
-    }
+    private readonly ILogger<CreateRestaurantPageFunction> _logger = logger;
+    private readonly NotionClient _notionClient = notionClient;
 
     [Function("CreateRestaurantPage")]
     public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req)
@@ -25,31 +23,26 @@ public class CreateRestaurantPageFunction
             _logger.LogInformation(requestBody);
             var data = JsonSerializer.Deserialize<CreateRestaurantRequest>(requestBody);
 
+            if (data is null || string.IsNullOrWhiteSpace(data.Name))
+            {
+                return new BadRequestObjectResult("店名が指定されていません。");
+            }
+            if (string.IsNullOrWhiteSpace(data.Address))
+            {
+                return new BadRequestObjectResult("住所が指定されていません。");
+            }
+            var address = data.Address;
+            var link = "";
+
+            var imageIdList = new List<string>();
             foreach (var photo in data.Photos)
             {
                 var photoData = Convert.FromBase64String(photo);
-                File.WriteAllBytes($"{Guid.NewGuid()}.jpg", photoData);
+                var imageId = await _notionClient.UploadImageAsync($"{data.Name}.jpg", photoData, MediaTypeNames.Image.Jpeg);
+                imageIdList.Add(imageId);
             }
 
-            if (data is null || string.IsNullOrWhiteSpace(data.Name) || string.IsNullOrWhiteSpace(data.Address))
-            {
-                return new BadRequestObjectResult("Restaurant name and address are required.");
-            }
-
-            // Log the received data for verification
-            _logger.LogInformation($"Restaurant page creation requested - Name: {data.Name}, Address: {data.Address}, Visit Date: {data.VisitDate}, Photos Count: {data.Photos.Length}");
-
-            // TODO: Implement Notion page creation when Experience2Notion library is available
-            // For now, return success with the received data
-            var result = new
-            {
-                message = "Restaurant data received successfully",
-                restaurantName = data.Name,
-                address = data.Address,
-                visitDate = data.VisitDate,
-                photosCount = data.Photos.Length
-            };
-
+            var result = await _notionClient.CreateRestaurantPageAsync(data.Name, address, link, data.VisitDate, imageIdList);
             return new OkObjectResult(result);
         }
         catch (JsonException ex)
