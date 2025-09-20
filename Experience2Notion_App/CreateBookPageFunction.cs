@@ -9,11 +9,11 @@ using System.Text.Json;
 
 namespace Experience2Notion_App;
 
-public class CreateBookPageFunction(ILogger<CreateBookPageFunction> logger, GoogleBookSeacher googleBookSeacher, GoogleImageSearcher googleImageSearcher, NotionClient notionClient)
+public class CreateBookPageFunction(ILogger<CreateBookPageFunction> logger, GoogleBookSeacher googleBookSeacher, GoogleEngineSearcher googleImageSearcher, NotionClient notionClient)
 {
     private readonly ILogger<CreateBookPageFunction> _logger = logger;
     private readonly GoogleBookSeacher _googleBookSeacher = googleBookSeacher;
-    private readonly GoogleImageSearcher _googleImageSearcher = googleImageSearcher;
+    private readonly GoogleEngineSearcher _googleImageSearcher = googleImageSearcher;
     private readonly NotionClient _notionClient = notionClient;
 
     [Function("CreateBookPage")]

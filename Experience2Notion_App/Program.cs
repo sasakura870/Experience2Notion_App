@@ -13,7 +13,7 @@ builder.Services
     .ConfigureFunctionsApplicationInsights();
 
 builder.Services.AddSingleton<GoogleBookSeacher>();
-builder.Services.AddSingleton<GoogleImageSearcher>();
+builder.Services.AddSingleton<GoogleEngineSearcher>();
 builder.Services.AddSingleton<SpotifyClient>();
 builder.Services.AddSingleton<NotionClient>();
 
