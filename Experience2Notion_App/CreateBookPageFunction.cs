@@ -9,11 +9,11 @@ using System.Text.Json;
 
 namespace Experience2Notion_App;
 
-public class CreateBookPageFunction(ILogger<CreateBookPageFunction> logger, GoogleBookSeacher googleBookSeacher, GoogleEngineSearcher googleImageSearcher, NotionClient notionClient)
+public class CreateBookPageFunction(ILogger<CreateBookPageFunction> logger, GoogleBookSeacher googleBookSeacher, GoogleEngineSearcher googleEngineSearcher, NotionClient notionClient)
 {
     private readonly ILogger<CreateBookPageFunction> _logger = logger;
     private readonly GoogleBookSeacher _googleBookSeacher = googleBookSeacher;
-    private readonly GoogleEngineSearcher _googleImageSearcher = googleImageSearcher;
+    private readonly GoogleEngineSearcher _googleEngineSearcher = googleEngineSearcher;
     private readonly NotionClient _notionClient = notionClient;
 
     [Function("CreateBookPage")]
@@ -30,7 +30,7 @@ public class CreateBookPageFunction(ILogger<CreateBookPageFunction> logger, Goog
             }
 
             var book = await _googleBookSeacher.SearchByIsbnAsync(data.Isbn);
-            var (imageData, mime) = await _googleImageSearcher.DownloadImageAsync($"{book.Title} {string.Join(' ', book.Authors)}");
+            var (imageData, mime) = await _googleEngineSearcher.DownloadImageAsync($"{book.Title} {string.Join(' ', book.Authors)}");
             var imageId = await _notionClient.UploadImageAsync($"{book.Title}.jpg", imageData, mime);
             var result = await _notionClient.CreateBookPageAsync(book.Title, book.Authors, book.CanonicalVolumeLink, book.PublishedDate, imageId);
             return new OkObjectResult(result);
