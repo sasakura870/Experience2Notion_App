@@ -20,64 +20,51 @@ public partial class CreateRestaurantPageFunction(ILogger<CreateRestaurantPageFu
     [Function("CreateRestaurantPage")]
     public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req)
     {
-        try
+        var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+        var data = JsonSerializer.Deserialize<CreateRestaurantRequest>(requestBody);
+
+        if (data is null || string.IsNullOrWhiteSpace(data.Name))
         {
-            var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            var data = JsonSerializer.Deserialize<CreateRestaurantRequest>(requestBody);
-
-            if (data is null || string.IsNullOrWhiteSpace(data.Name))
-            {
-                return new BadRequestObjectResult("店名が指定されていません。");
-            }
-            if (string.IsNullOrWhiteSpace(data.Address))
-            {
-                return new BadRequestObjectResult("住所が指定されていません。");
-            }
-            var lines = data.Address.Split('\n');
-            // 住所は5行のデータで来ることを想定
-            // 1行目: 店名、2行目: 郵便番号 3行目: 市町村、4行目: 番地、5行目: 国
-            // 2行目と3行目を結合して、空白とカンマを削除したものを住所とする
-            var address = $"{lines[2]}{lines[3]}".Replace(" ", "").Replace("　", "").Replace(",", "");
-
-            Result? targetSearchResult = null;
-            var searchCount = 0;
-            while (targetSearchResult is null)
-            {
-                searchCount++;
-                var searchResult = await _googleEngineSearcher.GetSearchResultAsync($"{data.Name}", searchCount);
-                var tabelogRegex = TabelogRegex();
-                targetSearchResult = searchResult.FirstOrDefault(x => tabelogRegex.IsMatch(x.Link) && x.Title.Contains(data.Name));
-            }
-            if (targetSearchResult == null)
-            {
-                return new BadRequestObjectResult("食べログのリンクが見つかりませんでした。");
-            }
-            var link = targetSearchResult.Link;
-            // 食べログのタイトルは「店名 - 住所」の形式なので、" - "で分割して最初の要素を店名とする
-            var name = targetSearchResult.Title.Split(" - ")[0];
-            var visitDate = DateTime.Parse(data.VisitDate).ToString("yyyy-MM-dd");
-
-            var imageIdList = new List<string>();
-            foreach (var photo in data.Photos)
-            {
-                var photoData = Convert.FromBase64String(photo);
-                var imageId = await _notionClient.UploadImageAsync($"{data.Name}.jpg", photoData, MediaTypeNames.Image.Jpeg);
-                imageIdList.Add(imageId);
-            }
-
-            var result = await _notionClient.CreateRestaurantPageAsync(name, address, link, visitDate, imageIdList);
-            return new OkObjectResult(result);
+            return new BadRequestObjectResult("店名が指定されていません。");
         }
-        catch (JsonException ex)
+        if (string.IsNullOrWhiteSpace(data.Address))
         {
-            _logger.LogError(ex, "Invalid JSON format in request");
-            return new BadRequestObjectResult("Invalid JSON format in request.");
+            return new BadRequestObjectResult("住所が指定されていません。");
         }
-        catch (Exception ex)
+        var lines = data.Address.Split('\n');
+        // 住所は5行のデータで来ることを想定
+        // 1行目: 店名、2行目: 郵便番号 3行目: 市町村、4行目: 番地、5行目: 国
+        // 2行目と3行目を結合して、空白とカンマを削除したものを住所とする
+        var address = $"{lines[2]}{lines[3]}".Replace(" ", "").Replace("　", "").Replace(",", "");
+
+        Result? targetSearchResult = null;
+        var searchCount = 0;
+        while (targetSearchResult is null)
         {
-            _logger.LogError(ex, "Error processing restaurant page creation request");
-            return new StatusCodeResult(500);
+            searchCount++;
+            var searchResult = await _googleEngineSearcher.GetSearchResultAsync($"{data.Name} {address} 食べログ", searchCount);
+            var tabelogRegex = TabelogRegex();
+            targetSearchResult = searchResult.FirstOrDefault(x => tabelogRegex.IsMatch(x.Link) && x.Title.Contains(data.Name));
         }
+        if (targetSearchResult == null)
+        {
+            return new BadRequestObjectResult("食べログのリンクが見つかりませんでした。");
+        }
+        var link = targetSearchResult.Link;
+        // 食べログのタイトルは「店名 - 住所」の形式なので、" - "で分割して最初の要素を店名とする
+        var name = targetSearchResult.Title.Split(" - ")[0];
+        var visitDate = DateTime.Parse(data.VisitDate).ToString("yyyy-MM-dd");
+
+        var imageIdList = new List<string>();
+        foreach (var photo in data.Photos)
+        {
+            var photoData = Convert.FromBase64String(photo);
+            var imageId = await _notionClient.UploadImageAsync($"{data.Name}.jpg", photoData, MediaTypeNames.Image.Jpeg);
+            imageIdList.Add(imageId);
+        }
+
+        var result = await _notionClient.CreateRestaurantPageAsync(name, address, link, visitDate, imageIdList);
+        return new OkObjectResult(result);
     }
 
     // 食べログの店トップページにマッチする正規表現
