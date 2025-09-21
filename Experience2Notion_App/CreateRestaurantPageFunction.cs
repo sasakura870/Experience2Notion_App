@@ -1,3 +1,4 @@
+using Experience2Notion.Exceptions;
 using Experience2Notion.Services;
 using Experience2Notion_App.Models;
 using Google.Apis.CustomSearchAPI.v1.Data;
@@ -39,12 +40,34 @@ public partial class CreateRestaurantPageFunction(ILogger<CreateRestaurantPageFu
 
         Result? targetSearchResult = null;
         var searchCount = 0;
+        var isReachNotFound = false;
         while (targetSearchResult is null)
         {
-            searchCount++;
-            var searchResult = await _googleEngineSearcher.GetSearchResultAsync($"{data.Name} {address} 食べログ", searchCount);
-            var tabelogRegex = TabelogRegex();
-            targetSearchResult = searchResult.FirstOrDefault(x => tabelogRegex.IsMatch(x.Link) && x.Title.Contains(data.Name));
+            try
+            {
+                searchCount++;
+                var query = isReachNotFound ? $"{data.Name} {address}" : $"{data.Name}";
+                var searchResult = await _googleEngineSearcher.GetSearchResultAsync(query, searchCount);
+                var tabelogRegex = TabelogRegex();
+                targetSearchResult = searchResult.FirstOrDefault(x => tabelogRegex.IsMatch(x.Link) && x.Title.Contains(data.Name));
+            }
+            catch (Experience2NotionException)
+            {
+                _logger.LogInformation("検索結果が見つかりません。");
+                if (isReachNotFound)
+                {
+                    if (targetSearchResult == null)
+                    {
+                        return new BadRequestObjectResult("食べログのリンクが見つかりませんでした。");
+                    }
+                }
+                else
+                {
+                    _logger.LogInformation("検索クエリを緩和して再度検索します。");
+                    searchCount = 0;
+                    isReachNotFound = true;
+                }
+            }
         }
         if (targetSearchResult == null)
         {
