@@ -15,6 +15,7 @@ builder.Services
 builder.Services.AddSingleton<GoogleBookSeacher>();
 builder.Services.AddSingleton<GoogleEngineSearcher>();
 builder.Services.AddSingleton<SpotifyClient>();
+builder.Services.AddSingleton<BookCoverClient>();
 builder.Services.AddSingleton<NotionClient>();
 
 builder.Build().Run();
