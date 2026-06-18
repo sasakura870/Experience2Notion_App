@@ -9,10 +9,10 @@ using System.Text.Json;
 
 namespace Experience2Notion_App;
 
-public class CreateMusicAlbumPageFunction(ILogger<CreateMusicAlbumPageFunction> logger, SpotifyClient spotifyClient, NotionClient notionClient)
+public class CreateMusicAlbumPageFunction(ILogger<CreateMusicAlbumPageFunction> logger, MusicAlbumSearchClient musicAlbumSearchClient, NotionClient notionClient)
 {
     private readonly ILogger<CreateMusicAlbumPageFunction> _logger = logger;
-    private readonly SpotifyClient _spotifyClient = spotifyClient;
+    private readonly MusicAlbumSearchClient _musicAlbumSearchClient = musicAlbumSearchClient;
     private readonly NotionClient _notionClient = notionClient;
 
     [Function("CreateMusicAlbumPage")]
@@ -25,19 +25,19 @@ public class CreateMusicAlbumPageFunction(ILogger<CreateMusicAlbumPageFunction> 
         {
             return new BadRequestObjectResult($"アルバム名もしくはアーティスト名が指定されていません。");
         }
-        var spotifyAlbumData = await _spotifyClient.SearchAlbumAsync(album.Title, album.Artist);
-        if (spotifyAlbumData is null)
+        var albumData = await _musicAlbumSearchClient.SearchAlbumAsync(album.Title, album.Artist);
+        if (albumData is null)
         {
             return new BadRequestObjectResult($"指定されたアルバムが見つかりませんでした。Title: {album.Title}, Artist: {album.Artist}");
         }
         var imageData = Array.Empty<byte>();
-        if (spotifyAlbumData.Images.Count != 0)
+        if (albumData.Images.Count != 0)
         {
             using var httpClient = new HttpClient();
-            imageData = await httpClient.GetByteArrayAsync(spotifyAlbumData.Images[0].Url);
+            imageData = await httpClient.GetByteArrayAsync(albumData.Images[0].Url);
         }
-        var imageId = await _notionClient.UploadImageAsync($"{spotifyAlbumData.Name}.jpg", imageData, MediaTypeNames.Image.Jpeg);
-        var result = await _notionClient.CreateMusicAlbumPageAsync(spotifyAlbumData.Name, spotifyAlbumData.Artists.Select(artist => artist.Name), spotifyAlbumData.ExternalUrl, spotifyAlbumData.ReleaseDate, imageId);
+        var imageId = await _notionClient.UploadImageAsync($"{albumData.Name}.jpg", imageData, MediaTypeNames.Image.Jpeg);
+        var result = await _notionClient.CreateMusicAlbumPageAsync(albumData.Name, albumData.Artists.Select(artist => artist.Name), albumData.ExternalUrl, albumData.ReleaseDate, imageId);
         return new OkObjectResult(result);
     }
 }
