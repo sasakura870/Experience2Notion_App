@@ -1,4 +1,4 @@
-using Experience2Notion.Services;
+ï»¿using Experience2Notion.Services;
 using Experience2Notion_App.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -23,12 +23,12 @@ public class CreateMusicAlbumPageFunction(ILogger<CreateMusicAlbumPageFunction> 
         var album = JsonSerializer.Deserialize<CreateMusicAlbumRequest>(requestBody);
         if (album is null || string.IsNullOrWhiteSpace(album.Title) || string.IsNullOrWhiteSpace(album.Artist))
         {
-            return new BadRequestObjectResult($"ƒAƒ‹ƒoƒ€–¼‚à‚µ‚­‚ÍƒA[ƒeƒBƒXƒg–¼‚ªw’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB");
+            return new BadRequestObjectResult($"ã‚¢ãƒ«ãƒãƒ åã‚‚ã—ãã¯ã‚¢ãƒ¼ãƒ†ã‚£ã‚¹ãƒˆåãŒæŒ‡å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚");
         }
         var albumData = await _musicAlbumSearchClient.SearchAlbumAsync(album.Title, album.Artist);
         if (albumData is null)
         {
-            return new BadRequestObjectResult($"w’è‚³‚ê‚½ƒAƒ‹ƒoƒ€‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñ‚Å‚µ‚½BTitle: {album.Title}, Artist: {album.Artist}");
+            return new BadRequestObjectResult($"æŒ‡å®šã•ã‚ŒãŸã‚¢ãƒ«ãƒãƒ ãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“ã§ã—ãŸã€‚Title: {album.Title}, Artist: {album.Artist}");
         }
         var imageData = Array.Empty<byte>();
         if (albumData.Images.Count != 0)
