@@ -13,7 +13,7 @@ builder.Services
     .ConfigureFunctionsApplicationInsights();
 
 builder.Services.AddSingleton<GoogleBookSeacher>();
-builder.Services.AddSingleton<GoogleEngineSearcher>();
+builder.Services.AddSingleton<BraveSearchClient>();
 builder.Services.AddSingleton<MusicAlbumSearchClient>();
 builder.Services.AddSingleton<BookCoverClient>();
 builder.Services.AddSingleton<NotionClient>();
